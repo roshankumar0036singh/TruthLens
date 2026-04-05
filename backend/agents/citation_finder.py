@@ -27,6 +27,15 @@ class CitationFinderAgent(BaseAgent):
         self.firecrawl_key = os.getenv("FIRECRAWL_API_KEY")
         self.serpapi_key = os.getenv("SERPAPI_API_KEY") 
         self.scholar_key = os.getenv("SEMANTIC_SCHOLAR_API_KEY")
+        
+        # Diagnostic: SerpAPI is now primary search provider
+        if self.serpapi_key:
+            masked = f"{self.serpapi_key[:8]}...{self.serpapi_key[-4:]}"
+            print(f"[CitationFinder] SerpAPI Key Loaded ({masked}) - PRIMARY search active.")
+        else:
+            print("[CitationFinder] WARNING: SerpAPI key missing. Add SERPAPI_API_KEY to .env")
+        if self.firecrawl_key:
+            print("[CitationFinder] Firecrawl Key Loaded - SECONDARY search active.")
 
     async def _query_google(self, query: str) -> List[Dict]:
         if not self.google_key or not self.google_cx: return []
@@ -115,10 +124,10 @@ class CitationFinderAgent(BaseAgent):
             search_query = self._clean_query(claim_text)
             if not search_query: continue
             
-            # 1. Multi-Query Dispatch
+            # 1. Multi-Query Dispatch (SerpAPI primary, Firecrawl + Scholar as secondary)
+            # Google Custom Search removed - use SerpAPI which works without billing restrictions
             search_tasks = [
-                self._query_google(f"fact check {search_query}"),
-                self._query_google(search_query),
+                self._query_serpapi(f"fact check {search_query}"),
                 self._query_serpapi(search_query),
                 self._query_firecrawl(search_query),
                 self._query_scholarly(search_query)

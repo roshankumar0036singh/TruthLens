@@ -27,12 +27,23 @@ const KnowledgeGraph = ({ topology }) => {
 
   useEffect(() => {
      if (fgRef.current && dimensions.width > 0) {
-        // give it a tiny bit of time to render nodes
         setTimeout(() => {
             fgRef.current.zoomToFit(400, 50);
-        }, 300);
+        }, 500);
      }
   }, [topology, dimensions.width]);
+
+  // Pin all nodes in place after simulation settles to stop jitter
+  const handleEngineStop = () => {
+    if (!fgRef.current) return;
+    const graphDataRef = fgRef.current.graphData();
+    graphDataRef.nodes.forEach(node => {
+      node.fx = node.x;
+      node.fy = node.y;
+    });
+    // Zoom to fit after stabilizing
+    fgRef.current.zoomToFit(400, 40);
+  };
 
   // Robustly handle both string IDs and object-based nodes
   const nodes = [];
@@ -71,12 +82,24 @@ const KnowledgeGraph = ({ topology }) => {
       <div ref={containerRef} className="border border-white/5 rounded-3xl overflow-hidden bg-black/60 relative" style={{ height: 400 }}>
          {dimensions.width > 0 && (
            <ForceGraph2D
-             ref={fgRef}
-             width={dimensions.width}
-             height={dimensions.height}
-             graphData={graphData}
-             nodeLabel="name"
-             onNodeClick={node => setSelectedNode(node)}
+              ref={fgRef}
+              width={dimensions.width}
+              height={dimensions.height}
+              graphData={graphData}
+              nodeLabel="name"
+              onNodeClick={node => setSelectedNode(node)}
+              // --- Stability Configuration ---
+              d3AlphaDecay={0.04}        // Cools simulation faster (default 0.0228)
+              d3VelocityDecay={0.5}      // More damping = less bouncing (default 0.4)
+              warmupTicks={120}          // Run 120 ticks silently before rendering
+              cooldownTicks={50}         // Stop engine after 50 visible ticks
+              onEngineStop={handleEngineStop}  // Pin all nodes when engine stops
+              d3Force={"charge"}         // Reference only; configured below
+              d3ForceConfig={{
+                charge: { strength: -80 },   // Weaker repulsion (default -300)
+                link: { distance: 80 },       // Fixed link length
+                collision: { radius: 35 },    // Prevent node overlap
+              }}
              linkColor={link => {
                if (viewMode === 'lineage') {
                  return link.source_type === 'modifier' ? 'rgba(255, 165, 0, 0.6)' : 'rgba(163, 230, 53, 0.3)';

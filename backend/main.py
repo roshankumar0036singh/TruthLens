@@ -5,6 +5,11 @@ from api import verify, community, creator, marketplace, live_socket, headless_c
 from database import engine, Base
 from agents import initialize_orchestrator
 import asyncio
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = FastAPI(title="TruthLens Backend", version="1.1.0")
 
@@ -229,8 +234,34 @@ def transaction_bridge_page(action: str, verdict_id: int = 0):
                     if (!window.ethereum) {{ alert("MetaMask not found!"); return; }}
                     const status = document.getElementById('status');
                     status.style.display = 'block';
+                    status.innerText = 'SWITCHING TO SHARDEUM...';
 
                     try {{
+                        // Force switch to Shardeum Mezame Testnet
+                        try {{
+                            await window.ethereum.request({{
+                                method: 'wallet_switchEthereumChain',
+                                params: [{{ chainId: '0x1FB7' }}], // 8119 in hex
+                            }});
+                        }} catch (switchError) {{
+                            // Chain not added yet - add it automatically
+                            if (switchError.code === 4902) {{
+                                await window.ethereum.request({{
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{{
+                                        chainId: '0x1FB7',
+                                        chainName: 'Shardeum Mezame',
+                                        nativeCurrency: {{ name: 'SHM', symbol: 'SHM', decimals: 18 }},
+                                        rpcUrls: ['https://api-mezame.shardeum.org'],
+                                        blockExplorerUrls: ['https://explorer-mezame.shardeum.org'],
+                                    }}],
+                                }});
+                            }} else {{
+                                throw switchError;
+                            }}
+                        }}
+
+                        status.innerText = 'SIGNING TRANSACTION...';
                         const provider = new ethers.providers.Web3Provider(window.ethereum);
                         await provider.send("eth_requestAccounts", []);
                         const signer = provider.getSigner();
