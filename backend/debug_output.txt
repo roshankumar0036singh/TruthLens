@@ -1,0 +1,31 @@
+﻿python : C:\Users\Roshan\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\__init__.py:113: 
+RequestsDependencyWarning: urllib3 (2.5.0) or chardet (7.0.1)/charset_normalizer (3.4.3) doesn't match a supported version!
+At line:1 char:1
++ python test_pipeline.py *>&1 | Out-File -FilePath debug_output.txt -E ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\Roshan...ported version!:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  warnings.warn(
+Initializing TruthLens Orchestrator...
+Dispatching Verification Protocol for: 'NASA officially admits that the Moon is an artificial structure made of hollow titanium.'
+--------------------------------------------------
+[PROCESSING] Orchestrator: Dispatching Multi-Agent waves (Batch size: 3)...
+[PROCESSING] Orchestrator: Starting Wave 1/3...
+[RESOLVED] SourceCredibility: SourceCredibility analysis completed.
+[RESOLVED] ClaimExtractor: ClaimExtractor analysis completed.
+[RESOLVED] CitationFinder: CitationFinder analysis completed.
+[PROCESSING] Orchestrator: Starting Wave 2/3...
+[RESOLVED] MediaForensics: MediaForensics analysis completed.
+[RESOLVED] CrossLanguage: CrossLanguage analysis completed.
+[FAILED] SentimentBias: SentimentBias failed: All LLM providers (Mistral & Gemini) failed to respond.
+ERROR: All LLM providers (Mistral & Gemini) failed to respond.
+[PROCESSING] Orchestrator: Starting Wave 3/3...
+[RESOLVED] ViralTracker: ViralTracker analysis completed.
+[PROCESSING] Aggregator: Synthesizing final consensus...
+[COMPLETED] FinalVerdict: 
+--------------------------------------------------
+FINAL VERDICT RECEIVED
+Verdict: FALSE
+Confidence: 85.0%
+Explanation: [HEURISTIC] Synthesized from 7 active signals. Primary LLM was unavailable, but cross-agent analysis suggests FALSE.
