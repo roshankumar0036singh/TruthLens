@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthLens Wallet Bridge</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(163, 230, 53, 0.2);
+            border-radius: 32px;
+            backdrop-filter: blur(40px);
+            max-width: 400px;
+        }
+        .icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 24px;
+            color: #a3e635;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            margin: 0 0 12px 0;
+        }
+        p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 0 0 32px 0;
+            line-height: 1.6;
+        }
+        .btn {
+            background: #a3e635;
+            color: #000;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(163, 230, 53, 0.2);
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(163, 230, 53, 0.3);
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .status {
+            margin-top: 24px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #a3e635;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        <h1>Wallet Sync.</h1>
+        <p>Bypassing browser sidepanel isolation to connect MetaMask for full transactions.</p>
+        <button id="connectBtn" class="btn">Confirm Identity</button>
+        <div id="status" class="status italic animate-pulse">Linking Identity Hub...</div>
+    </div>
+
+    <script src="bridge.js"></script>
+</body>
+</html>
