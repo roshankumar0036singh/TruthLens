@@ -1,0 +1,27 @@
+{
+  "name": "truthlens",
+  "version": "1.0.0",
+  "description": "Fake News Detection Assistant Ecosystem",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "extension",
+    "pwa",
+    "shared"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=frontend",
+    "dev:ext": "npm run dev --workspace=extension",
+    "build:all": "npm run build --workspaces"
+  },
+  "type": "module",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^17.4.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.7",
+    "ethers": "^6.16.0",
+    "hardhat": "^3.3.0"
+  }
+}
