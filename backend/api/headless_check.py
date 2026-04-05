@@ -36,10 +36,11 @@ async def quick_check(request: HeadlessCheckRequest):
         extract_result = await llm_factory.generate_content(extract_prompt, model_preference="mistral")
         claim = extract_result.get("text", request.text).strip()
         
-        # 2. Multi-Query Search (Corroboration + Fact Check)
+        # 2. Multi-Query Search (SerpAPI primary, DuckDuckGo free fallback)
         search_tasks = [
-            citation_agent._query_google(f"fact check {claim}"), # Looking for debunkings
-            citation_agent._query_google(f"{claim}")            # Looking for corroborating news
+            citation_agent._query_serpapi(f"fact check {claim}"),
+            citation_agent._query_serpapi(f"{claim}"),
+            citation_agent._query_duckduckgo(f"fact check {claim}"),
         ]
         results = await asyncio.gather(*search_tasks)
         merged = [item for sublist in results for item in sublist]

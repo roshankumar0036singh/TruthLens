@@ -33,15 +33,9 @@ const KnowledgeGraph = ({ topology }) => {
      }
   }, [topology, dimensions.width]);
 
-  // Pin all nodes in place after simulation settles to stop jitter
+  // Zoom to fit after the physics simulation cools down
   const handleEngineStop = () => {
     if (!fgRef.current) return;
-    const graphDataRef = fgRef.current.graphData();
-    graphDataRef.nodes.forEach(node => {
-      node.fx = node.x;
-      node.fy = node.y;
-    });
-    // Zoom to fit after stabilizing
     fgRef.current.zoomToFit(400, 40);
   };
 

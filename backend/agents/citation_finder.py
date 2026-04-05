@@ -71,21 +71,45 @@ class CitationFinderAgent(BaseAgent):
             print(f"SerpAPI Error: {e}")
         return []
 
-    async def _query_duckduckgo(self, query: str) -> List[Dict]:
-        return [] # Placeholder
-
     async def _query_firecrawl(self, query: str) -> List[Dict]:
         if not self.firecrawl_key: return []
-        url = "https://api.firecrawl.dev/v0/search"
+        # Firecrawl v1 API endpoint
+        url = "https://api.firecrawl.dev/v1/search"
         headers = {"Authorization": f"Bearer {self.firecrawl_key}", "Content-Type": "application/json"}
         try:
             async with httpx.AsyncClient() as client:
-                resp = await client.post(url, headers=headers, json={"query": query, "limit": 2}, timeout=15.0)
+                resp = await client.post(url, headers=headers, json={"query": query, "limit": 3}, timeout=15.0)
                 if resp.status_code == 200:
                     data = resp.json().get("data", [])
-                    return [{"url": d.get("url"), "content": d.get("markdown"), "source": "Firecrawl"} for d in data]
+                    results = [{"url": d.get("url"), "snippet": (d.get("markdown") or d.get("description", ""))[:500], "source": "Firecrawl"} for d in data if d.get("url")]
+                    if results: print(f"[CitationFinder] Firecrawl: {len(results)} results for '{query[:30]}'")
+                    return results
+                else:
+                    print(f"Firecrawl Error: {resp.status_code} - {resp.text[:120]}")
         except Exception as e:
-            print(f"Firecrawl Error: {e}")
+            print(f"Firecrawl Exception: {e}")
+        return []
+
+    async def _query_duckduckgo(self, query: str) -> List[Dict]:
+        """Free DuckDuckGo instant answers - no API key needed."""
+        url = "https://api.duckduckgo.com/"
+        params = {"q": query, "format": "json", "no_redirect": "1", "no_html": "1"}
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(url, params=params, timeout=8.0)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    results = []
+                    # Abstract result
+                    if data.get("AbstractText") and data.get("AbstractURL"):
+                        results.append({"url": data["AbstractURL"], "snippet": data["AbstractText"][:400], "source": "DuckDuckGo"})
+                    # Related topics
+                    for t in data.get("RelatedTopics", [])[:4]:
+                        if isinstance(t, dict) and t.get("FirstURL") and t.get("Text"):
+                            results.append({"url": t["FirstURL"], "snippet": t["Text"][:300], "source": "DuckDuckGo"})
+                    return results
+        except Exception as e:
+            print(f"DuckDuckGo Error: {e}")
         return []
 
     async def _query_scholarly(self, query: str) -> List[Dict]:
@@ -124,12 +148,13 @@ class CitationFinderAgent(BaseAgent):
             search_query = self._clean_query(claim_text)
             if not search_query: continue
             
-            # 1. Multi-Query Dispatch (SerpAPI primary, Firecrawl + Scholar as secondary)
-            # Google Custom Search removed - use SerpAPI which works without billing restrictions
+            # 1. Multi-Query Dispatch
+            # Priority: SerpAPI (best) -> Firecrawl (rich content) -> DuckDuckGo (free, no key) -> Scholar
             search_tasks = [
                 self._query_serpapi(f"fact check {search_query}"),
                 self._query_serpapi(search_query),
                 self._query_firecrawl(search_query),
+                self._query_duckduckgo(f"fact check {search_query}"),
                 self._query_scholarly(search_query)
             ]
             
