@@ -1,0 +1,39 @@
+name: TruthLens CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Monorepo Dependencies
+        run: npm install
+
+      - name: Check Backend formatting
+        run: echo "Run specific backend formatting check here"
+
+      - name: Run Web tests
+        run: |
+          # Add frontend react tests here
+          echo "No tests found"
+
+      - name: Run Extension checks
+        run: |
+          # Add extension checks here
+          echo "No extension checks found"
